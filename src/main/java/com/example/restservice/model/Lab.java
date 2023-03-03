@@ -16,7 +16,8 @@ public class Lab {
 	private String building;
 	@JsonProperty("features")
 	private String[] features;
-	@JsonProperty("schedule") private String[][][] schedule;
+	@JsonProperty("schedule") 
+	private String[][][] schedule;
 
 	// concrete set of features and buildings (needed so that if
 	// a Filter is removed, the Lab is updated instantly and can 
