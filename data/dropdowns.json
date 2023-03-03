@@ -1,0 +1,166 @@
+[
+    {
+        "type": "Dropdown",
+        "name": "colleges",
+        "items": [
+            {
+                "type": "Dropdown",
+                "name": "engineering sciences",
+                "items": [
+                    {
+                        "type": "Building",
+                        "name": "gollisanno",
+                        "abbreviation": "gol",
+                        "num": 17
+                    },
+                    {
+                        "type": "Building",
+                        "name": "magic",
+                        "abbreviation": "mss",
+                        "num": 18
+                    },
+                    {
+                        "type": "Building",
+                        "name": "gleason",
+                        "abbreviation": "kgh",
+                        "num": 19
+                    },
+                    {
+                        "type": "Building",
+                        "name": "gosnell",
+                        "abbreviation": "gos",
+                        "num": 20
+                    },
+                    {
+                        "type": "Building",
+                        "name": "slaughter hall",
+                        "abbreviation": "sla",
+                        "num": 21
+                    }
+                ]
+            },
+            {
+                "type": "Dropdown",
+                "name": "Liberal Arts",
+                "items": [
+                    {
+                        "type": "Building",
+                        "name": "gannette",
+                        "abbreviation": "gan",
+                        "num": 31
+                    },
+                    {
+                        "type": "Building",
+                        "name": "booth",
+                        "abbreviation": "boo",
+                        "num": 32
+                    },
+                    {
+                        "type": "Building",
+                        "name": "liberal arts hall",
+                        "abbreviation": "lbr",
+                        "num": 33
+                    }
+                ]
+            },
+            {
+                "type": "Building",
+                "name": "saunders",
+                "abbreviation": "low",
+                "num": 31
+            },
+            {
+                "type": "Building",
+                "name": "institute hall",
+                "abbreviation": "ins",
+                "num": 19
+            }
+        ]
+    },
+    {
+        "type": "Dropdown",
+        "name": "features",
+        "items": [
+            {
+                "type": "Dropdown",
+                "name": "computers and programs",
+                "items": [
+                    {
+                        "type": "Feature",
+                        "name": "windows computers"
+                    },
+                    {
+                        "type": "Feature",
+                        "name": "mac computers"
+                    },
+                    {
+                        "type": "Feature",
+                        "name": "dual monitors"
+                    },
+                    {
+                        "type": "Feature",
+                        "name": "wacom tablets"
+                    },
+                    {
+                        "type": "Feature",
+                        "name": "adobe suite access"
+                    }
+                ]
+            },
+            {
+                "type": "Dropdown",
+                "name": "physical sciences",
+                "items": [
+                    {
+                        "type": "Feature",
+                        "name": "centrifuges"
+                    },
+                    {
+                        "type": "Feature",
+                        "name": "ventilation"
+                    },
+                    {
+                        "type": "Feature",
+                        "name": "idk any others"
+                    }
+                ]
+            },
+            {
+                "type": "Dropdown",
+                "name": "engineering",
+                "items": [
+                    {
+                        "type": "Feature",
+                        "name": "fire extinguishers"
+                    }
+                ]
+            },
+            {
+                "type": "Feature",
+                "name": "tfhhfcdxhdrrhg"
+            }
+        ]
+    },
+    {
+        "type": "Dropdown",
+        "name": "hours",
+        "items": [
+            {
+                "type": "Hour",
+                "name": "open now"
+            },
+            {
+                "type": "Hour",
+                "name": "closes soon"
+            },
+            {
+                "type": "Hour",
+                "name": "closed"
+            },
+            {
+                "type": "Hour",
+                "name": "opens soon"
+            }
+        ]
+    }
+]
