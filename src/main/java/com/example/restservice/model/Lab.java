@@ -16,6 +16,7 @@ public class Lab {
 	private String building;
 	@JsonProperty("features")
 	private String[] features;
+	@JsonProperty("schedule") private String[][][] schedule;
 
 	// concrete set of features and buildings (needed so that if
 	// a Filter is removed, the Lab is updated instantly and can 
@@ -26,11 +27,13 @@ public class Lab {
 	public Lab(@JsonProperty("name") String name,
 	@JsonProperty("number") String number,
 	@JsonProperty("building") String building,
-	@JsonProperty("features") String[] features) {
+	@JsonProperty("features") String[] features,
+	@JsonProperty("schedule") String[][][] schedule) {
 		this.name = name;
 		this.number = number;
 		this.building = building;
 		this.features = features;
+		this.schedule = schedule;
 	}
 
 	public String getBuilding() {
