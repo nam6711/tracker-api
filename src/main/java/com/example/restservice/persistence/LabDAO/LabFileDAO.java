@@ -24,29 +24,28 @@ public class LabFileDAO implements LabDAO {
     private String filename;
 
     // this contains a reference to the dropdownDAO, which is used in order
-    //      to reference Filters for data combination within labs. Labs use
-    //      pre-built data on Buildings and Filters so as to not recreate items
+    // to reference Filters for data combination within labs. Labs use
+    // pre-built data on Buildings and Filters so as to not recreate items
     private DropdownDAO dropdownDAO;
 
     public LabFileDAO(@Value("${labs.file}") String filename, ObjectMapper objectMapper) throws IOException {
         this.filename = filename;
         this.objectMapper = objectMapper;
     }
-    
+
     public void setDropdownDAO(DropdownDAO dropdownDAO) {
         this.dropdownDAO = dropdownDAO;
 
         // now that we have a reference to the DropdownDAO, we can load the Labs
         try {
             load(); // function to load all data from JSON file
-        } 
-        catch (IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     /**
-     * Creates an array of {@link Lab lab} from the labs Map 
+     * Creates an array of {@link Lab lab} from the labs Map
      * using a search term. If the search term
      * is empty, return all {@link Lab lab} in labs Map
      * 
@@ -62,9 +61,9 @@ public class LabFileDAO implements LabDAO {
         // if the comparisonTerm is null, the program will return all Labs
         for (Lab lab : labs.values()) {
             // if the sent in comparison term is null
-            //      return every lab in the labs Map
+            // return every lab in the labs Map
             // if the current lab itterated onto has the same name as the comparison term
-            //      add it to the array list of labs
+            // add it to the array list of labs
             // else pass over it
             if (comparisonTerm == null || lab.getId().contains(comparisonTerm)) {
                 labArrayList.add(lab);
@@ -97,19 +96,14 @@ public class LabFileDAO implements LabDAO {
     private boolean load() throws IOException {
         labs = new TreeMap<>();
 
-        // loads all labs from JSON and maps into an array of Labs 
+        // loads all labs from JSON and maps into an array of Labs
         Lab[] labArray = objectMapper.readValue(new File(filename), Lab[].class);
 
         // iterate through the array, placing the current lab into the labs Map
         for (Lab lab : labArray) {
-            // finds and sets the lab's building
-            String building = lab.getBuilding();
-            Building labBuilding = this.dropdownDAO.findBuilding(building);
-            lab.setLabBuilding(labBuilding);
-            // finds all features for a lab
-            String[] features = lab.getFeatures();
-            Feature[] labFeatures = this.dropdownDAO.findFeatures(features);
-            lab.setLabFeatures(labFeatures);
+            // give account its needed values
+            this.initializeLab(lab);
+
             labs.put(lab.getId(), lab);
         }
 
@@ -130,8 +124,8 @@ public class LabFileDAO implements LabDAO {
      */
     @Override
     public Lab getLab(String name) {
-        synchronized(labs) {
-            if (labs.containsKey(name)) 
+        synchronized (labs) {
+            if (labs.containsKey(name))
                 return labs.get(name);
             else
                 return null;
@@ -143,10 +137,75 @@ public class LabFileDAO implements LabDAO {
      */
     @Override
     public Lab[] getLabs() throws IOException {
-        synchronized(labs) {
+        synchronized (labs) {
             return getLabArray();
         }
     }
 
-    
+    /**
+     ** {@inheritDoc}
+     */
+    @Override
+    public Lab createLab(Lab lab) throws IOException {
+        synchronized (labs) {
+            // give account its needed values
+            this.initializeLab(lab);
+
+            if (!labs.containsValue(lab)) {
+                labs.put(lab.getId(), lab);
+                saveLabs(); // may throw an IOException
+            }
+
+            return lab;
+        }
+    }
+
+    /**
+     ** {@inheritDoc}
+     */
+    @Override
+    public Lab updateLab(Lab lab) throws IOException {
+        synchronized (labs) {
+            // give account its needed values
+            this.initializeLab(lab);
+
+            // check if the lab already exists
+            if (labs.containsKey(lab.getId()) == false)
+                return null; // product does not exist
+            else 
+                labs.get(lab.getId()).deleteSelf();
+
+            // put new lab
+            labs.put(lab.getId(), lab);
+            saveLabs(); // may throw an IOException
+            return lab;
+        }
+    }
+
+    /**
+    ** {@inheritDoc}
+     */
+    @Override
+    public boolean deleteLab(String name) throws IOException {
+        synchronized(labs) {
+            if (labs.containsKey(name)) {
+                labs.remove(name);
+                return saveLabs();
+            }
+            else
+                return false;
+        }
+    }
+
+    private void initializeLab(Lab lab) {
+        // before lab can be read, it must be given access to the specified
+        // data
+        // those being the building and features
+        // building
+        Building labBuilding = this.dropdownDAO.findBuilding(lab.getBuilding());
+        lab.setLabBuilding(labBuilding);
+        // features
+        Feature[] labFeatures = this.dropdownDAO.findFeatures(lab.getFeatures());
+        lab.setLabFeatures(labFeatures);
+    }
 }

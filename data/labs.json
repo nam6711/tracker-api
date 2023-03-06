@@ -38,7 +38,7 @@
         "building": "booth",
         "features": [
             "adobe suite access",
-            "windows computers",
+            "render farm access",
             "wacom tablets"
         ],
         "schedule": [
@@ -71,7 +71,8 @@
         "building": "booth",
         "features": [
             "adobe suite access",
-            "mac computers"
+            "mac computers",
+            "autodesk suite access"
         ],
         "schedule": [
             [
@@ -103,7 +104,8 @@
         "building": "booth",
         "features": [
             "adobe suite access",
-            "mac computers"
+            "mac computers",
+            "render farm access"
         ],
         "schedule": [
             [
@@ -287,7 +289,7 @@
     {
         "name": "Additive Manufacturing and Metrology Lab",
         "number": "1160",
-        "building": "gollisanno",
+        "building": "golisano",
         "features": [
         ],
         "schedule": [
@@ -317,7 +319,7 @@
     {
         "name": "Advanced Mechanics Lab",
         "number": "1130",
-        "building": "gollisanno",
+        "building": "golisano",
         "features": [
             "windows computers"
         ],
@@ -348,7 +350,7 @@
     {
         "name": "Air Gap Lab and Server Room",
         "number": "2750",
-        "building": "gollisanno",
+        "building": "golisano",
         "features": [
             "windows computers"
         ],

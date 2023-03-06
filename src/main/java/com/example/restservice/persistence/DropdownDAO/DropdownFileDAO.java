@@ -8,8 +8,6 @@ import java.util.TreeMap;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import ch.qos.logback.core.filter.Filter;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -17,19 +15,27 @@ import com.example.restservice.model.DropdownItems.Dropdown;
 import com.example.restservice.model.DropdownItems.Item;
 import com.example.restservice.model.DropdownItems.Filter.Building;
 import com.example.restservice.model.DropdownItems.Filter.Feature;
+import com.example.restservice.persistence.LabDAO.LabDAO;
 
 @Component
 public class DropdownFileDAO implements DropdownDAO {
     Map<String, Dropdown> parentDropdowns; // holds the top-most dropdowns
-    
     private ObjectMapper objectMapper;
 
     private String filename;
+
+    // this contains a reference to the labDAO, which is used in order
+    // to reference Labs of any updates to buildings/filters
+    private LabDAO labDAO;
 
     public DropdownFileDAO(@Value("${dropdowns.file}") String filename, ObjectMapper objectMapper) throws IOException {
         this.filename = filename;
         this.objectMapper = objectMapper;
         load(); // function to load all data from JSON file
+    }
+
+    public void setLabDAO(LabDAO labDAO) {
+        this.labDAO = labDAO;
     }
 
     /**
@@ -99,7 +105,7 @@ public class DropdownFileDAO implements DropdownDAO {
         return true;
     }
 
-    private boolean saveLabs() throws IOException {
+    private Boolean saveDropdowns() throws IOException {
         // loads all labs into an array for saving to JSON
         Dropdown[] dropdownArray = getDropdownArray();
 
@@ -130,11 +136,162 @@ public class DropdownFileDAO implements DropdownDAO {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    public Item createFilter(String dropdownLocation, Item filter) throws IOException {
+        synchronized (parentDropdowns) {
+            // run through each lab, and then check if the given dropdown location
+            //      is either within the dropdown, or the dropdown itself.
+            // the chosen dropdown will take the filter and add it to its list of
+            //      items
+            for(Dropdown dropdown : this.parentDropdowns.values()) {
+                Dropdown result = dropdown.findDropdown(dropdownLocation);
+                // if the result of the previous query is not null, then we've found
+                //      our dropdown!! so add it on, and save the labs
+                if (result != null) {
+                    result.addItem(filter);
+                    saveDropdowns(); // may throw an IOException
+                    break;
+                }
+            }
+
+            return filter;
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Boolean moveFilter(String dropdownLocation, String filterName) throws IOException {
+        // see if the item is a building or feature.
+        Item requestedFilter = this.findBuilding(filterName);
+        if (requestedFilter == null) {
+            requestedFilter = this.findSingleFeature(filterName);
+            
+            // if the feature is still null, then it doesn't exist
+            if (requestedFilter == null) {
+                return false;
+            }
+        }
+
+
+        for(Dropdown dropdown : this.parentDropdowns.values()) {
+            Dropdown result = dropdown.findDropdown(dropdownLocation);
+            // if the result of the previous query is not null, then we've found
+            //      our dropdown!! so add it on, and save the labs
+            if (result != null) {
+                // tell the filter to set itself to a new dropdown
+                requestedFilter.setParent(result);
+
+                saveDropdowns(); // may throw an IOException
+                return true;
+            }
+        }
+
+        // if the new dropdown was never found, return false
+        return false;
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Building updateBuildingInfo(Building building) throws IOException {
+        synchronized (parentDropdowns) {
+            // give account its needed values
+            Building oldBuilding = this.findBuilding(building.getName());
+
+            // check if the lab already exists
+            if (oldBuilding != null) {
+                oldBuilding.updateBuildingInfo(building);
+            } else {
+                return null; // product does not exist
+            }
+            
+            saveDropdowns(); // may throw an IOException
+            return oldBuilding;
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Building updateBuildingName(String[] names) throws IOException {
+        synchronized (parentDropdowns) {
+            // give account its needed values
+            Building oldBuilding = this.findBuilding(names[0]);
+
+            // check if the lab already exists
+            if (oldBuilding != null) {
+                oldBuilding.update(names[1]);
+            } else {
+                return null; 
+            }
+            
+            saveDropdowns(); // may throw an IOException
+            return oldBuilding;
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Feature updateFeatureName(String[] names) throws IOException {
+        synchronized (parentDropdowns) {
+            // give account its needed values
+            Feature oldFeature = this.findSingleFeature(names[0]);
+
+            // check if the lab already exists
+            if (oldFeature != null) {
+                // we update the first feature as we only are looking for one
+                //      feature
+                oldFeature.update(names[1]);
+            } else {
+                return null; // product does not exist
+            }
+            
+            saveDropdowns(); // may throw an IOException
+            return oldFeature;
+        }
+    }
+
+    public Boolean deleteItem(String dropdownItem) throws IOException {
+        synchronized(parentDropdowns) { 
+            for (Dropdown dropdown : this.parentDropdowns.values()) {
+                Item result = dropdown.findItem(dropdownItem);
+                
+                // if the item exists, then remove it
+                if (result != null) {
+                    result.remove();
+                    return saveDropdowns();
+                }
+            }
+            
+            return false;
+        }
+    }
+
     public Building findBuilding(String buildingName) {
         // go to the 'colleges' dropdown in order to 
         //      find the Buildings and iterate through
         //      to see if we can find what we're looking for
         return parentDropdowns.get("colleges").findBuilding(buildingName);
+    }
+
+    public Feature findSingleFeature(String feature) {
+        // query the parent dropdown that holds all features for the current item
+        Feature result = parentDropdowns.get("features").findFeature(feature);
+        // if the found result was not null, then add it to
+        //      the found labs
+        if (result != null) {
+            return result;
+        }
+
+        return null;
     }
 
     public Feature[] findFeatures(String[] features) {              

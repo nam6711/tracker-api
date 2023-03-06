@@ -21,16 +21,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
  * interface for composite design pattern. Items may be leaves
  *      or components
  */
-public interface Item {
-    /**
-     * whenever an Item is removed from the persistent Items list, it needs
-     *      to alert all Lab's or other Items that are reliant upon it.
-     * this will alert the subscribed objects that the Item was removed so that
-     *      their properties are properly saved and don't cause any errors.
-     * this will run through all ItemSubscribers and LabSubscribers 
-     */
-    void removeAll();
-
+public interface Item {  
     /**
      * method will run through and check a given Item as to whether or not it
      *      is a Building with a matching name. This is used so that Lab 
@@ -45,6 +36,16 @@ public interface Item {
     Feature findFeature(String feature);
 
     /**
+     * checks if a given item name matches the instantiated Item
+     * 
+     * @param itemName name of the item we're looking for
+     * 
+     * @return returns the instantiated item if it is the item we're looking for
+     *      returns null otherwise
+     */
+    Item checkItemName(String itemName);
+
+    /**
      * removes an item from a listing of all items
      */
     void removeItem(Item item);
@@ -56,4 +57,12 @@ public interface Item {
      * @return String id of the lab
      */
     String getName();
+
+    /**
+     * if an item is removed from a dropdown, it should be able to process
+     *      and reflect that persistently
+     * 
+     * if a dropdown is removed, it shall remove itself permanently
+     */
+    void remove();
 }

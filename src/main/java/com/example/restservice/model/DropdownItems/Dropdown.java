@@ -1,6 +1,5 @@
 package com.example.restservice.model.DropdownItems;
 
-import java.util.Map;
 
 import com.example.restservice.model.DropdownItems.Filter.Building;
 import com.example.restservice.model.DropdownItems.Filter.Feature;
@@ -26,8 +25,10 @@ public class Dropdown implements Item {
     /**
      * this runs through all items within a given dropdown and
      *      sets their parent to the current dropdown.
+     * 
      * whenever the parent experiences an update, or something changes, 
      *      the parent will alert all its children via the items array.
+     * 
      * lastly, this allows the parent to search for information from 
      *      its children in case a Lab needs to reference something
      *      like a Building number, or a Lab Feature
@@ -39,6 +40,31 @@ public class Dropdown implements Item {
         }
     }
 
+    public Item findItem(String itemName) {
+        // iterate through all items and return the item we are on
+        //      if its name matches what we're looking for
+        // if no items are found return null
+        for (Item dropdownItem : this.items) {
+            // search through all the given items in this dropdown
+            Item result = dropdownItem.checkItemName(itemName);
+
+            if (result != null) {
+                return result;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * responsible for searching through a dropdown and finding whether or not
+     *      it has a building with a given name. if it does, return that building.
+     *      otherwise return null
+     * 
+     * @param buildingName matching name of building we are searching for
+     * 
+     * @return a {@link Building} that matches the given name request. null if none found
+     */
     public Building findBuilding(String buildingName) {
         for (Item dropdownItem : this.items) {
             Building result = dropdownItem.findBuilding(buildingName);
@@ -52,6 +78,29 @@ public class Dropdown implements Item {
         return null;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    public Item checkItemName(String itemName) { 
+        // if the item name is the same as this item, then return this item
+        //      otherwise search through this dropdown's items for it
+        if (this.getName().equals(itemName)) { 
+            return this;
+        }
+
+        // return if any of the dropdowns had the item inside it
+        return this.findItem(itemName);
+    }
+
+    /**
+     * responsible for searching through a dropdown and finding whether or not
+     *      it has a feature with a given name. if it does, return that feature.
+     *      otherwise return null
+     * 
+     * @param feature matching name of feature we are searching for
+     * 
+     * @return a {@link Filter} that matches the given name request. null if none found
+     */
     public Feature findFeature(String feature) {
         for (Item dropdownItem : this.items) {
             // store the queried item
@@ -68,21 +117,98 @@ public class Dropdown implements Item {
     }
 
     /**
-	 * {@inheritDoc}
-	 */
-    public void removeAll() {
-        
+     * responsible for searching through a dropdown and finding whether or not
+     *      it has a dropdown with a given name. if it does, return that dropdown.
+     *      otherwise return null
+     * 
+     * @param name matching name of dropdown we are searching for
+     * 
+     * @return a {@link Dropdown} that matches the given name request. null if none found
+     */
+    public Dropdown findDropdown(String name) {
+        // if the current dropdown is what we're lookin for, return it!
+        if (this.name.equals(name)) {
+            return this;
+        }
+
+        // iterate through all items in our collection and check if they're 
+        //      a dropdown and have the same title as what we're looking for
+        for (Item item : this.items) {
+            if (item instanceof Dropdown) {
+                // convert the current item to a dropdown
+                Dropdown currentItem = (Dropdown)item;
+                Dropdown result = currentItem.findDropdown(name);
+                
+                // if the current result is not null, then we've found our dropdown!
+                if (result != null) {
+                    return result;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * removes all items from the dropdown, and then alerts the parent to
+     *      remove this
+     * 
+     * only performs this if the dropdown has an existing parent
+     */
+    public void remove() {
+        if (this.parent != null) {
+            // call each individual dropdown and set their parents to
+            //      this dropdown's parent
+            for (Item dropdownItem : this.items) {
+                dropdownItem.setParent(this.parent);
+            }
+    
+            // tell this dropdown's parent to remove this
+            this.parent.removeItem(this);
+        }
     }
 
     /**
      * {@inheritDoc}
      */
-    public void removeItem(Item item) {
-        
+    public void removeItem(Item itemToRemove) {
+        // create a buffer to hold the new item
+        Item[] itemBuffer = new Item[this.items.length - 1]; 
+
+        // iterate through the entire item array and copy it onto the new array
+        //      so we can allow the new filter to be added in nicely
+        int i = 0;
+        for (Item item : this.items) {
+            if (item != itemToRemove) 
+                itemBuffer[i++] = item;
+        }
+
+        // point this.items to the item buffer now
+        this.items = itemBuffer;
+    }
+
+    public void addItem(Item newItem) {
+        // create a buffer to hold the new item
+        Item[] itemBuffer = new Item[this.items.length + 1];
+
+        // iterate through the entire item array and copy it onto the new array
+        //      so we can allow the new filter to be added in nicely
+        int i = 0;
+        for (Item item : this.items) {
+            itemBuffer[i++] = item;
+        }
+        itemBuffer[i] = newItem;
+
+        // point this.items to the item buffer now
+        this.items = itemBuffer;
     }
 
     public void setParent(Dropdown item) {
+        // set the parent, and reset the children's parent
         this.parent = item;
+
+        // tell the dropdown to update its children
+        this.loadDropdownItems();
     }
 
     /**
@@ -90,5 +216,9 @@ public class Dropdown implements Item {
 	 */
     public String getName() {
         return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }

@@ -43,4 +43,40 @@ public interface LabDAO {
      * @throws IOException for any issues that may arise
      */
     Lab[] getLabs() throws IOException;
+
+    /**
+     * Creates and saves a {@linkplain Lab}
+     * 
+     * @param lab {@linkplain Lab} object to be created and saved
+     *
+     * @return new {@link Lab} if successful, false otherwise 
+     * 
+     * @throws IOException if an issue with underlying storage
+     */
+    Lab createLab(Lab account) throws IOException;
+
+    /**
+     * Updates and saves a {@linkplain Lab}
+     * 
+     * @param {@link Lab} object to be updated and saved
+     * 
+     * @return updated {@link Lab} if successful, null if
+     * {@link Lab} could not be found
+     * 
+     * @throws IOException if underlying storage cannot be accessed
+     */
+    Lab updateLab(Lab lab) throws IOException;
+
+    /**
+     * Deletes a {@linkplain Lab} with the given name
+     * 
+     * @param name The name of the {@link Lab}
+     * 
+     * @return true if the {@link Lab} was deleted
+     * <br>
+     * false if hero with the given name does not exist
+     * 
+     * @throws IOException if underlying storage cannot be accessed
+     */
+    boolean deleteLab(String name) throws IOException;
 }
