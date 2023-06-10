@@ -3,9 +3,9 @@ package com.example.restservice.model.DropdownItems.Filter;
 import java.util.Map;
 import java.util.TreeMap;
 
-import com.example.restservice.model.Lab;
 import com.example.restservice.model.DropdownItems.Dropdown;
 import com.example.restservice.model.DropdownItems.Item;
+import com.example.restservice.model.Lab.Lab;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
@@ -63,10 +63,6 @@ public abstract class Filter implements Item {
 
         // if this is a building, then tell all labs to remove themselves
         if (this instanceof Building) {
-            for (Lab lab : this.labs.values()) {
-                lab.deleteSelf();
-            }
-
 
             // tell parent to remove this item
             this.parent.removeItem(this);
@@ -74,7 +70,7 @@ public abstract class Filter implements Item {
         }
 
         // otherwise, just tell the labs to remove the feature
-        
+
         // tell parent to remove this item
         this.parent.removeItem(this);
 
@@ -93,7 +89,11 @@ public abstract class Filter implements Item {
     }
 
     public void update(String name) {
-        this.name = name;
+        // iterate through all subscribed labs and alert them that the building
+        //      name changed
+        for (Lab lab : this.labs.values()) {
+            lab.setFeatureName(name, this.name);
+        }
     }
 
     /**
@@ -165,10 +165,24 @@ public abstract class Filter implements Item {
         return type;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
     /**
 	 * {@inheritDoc}
 	 */
     public String getName() {
         return name;
+    }
+
+    public Lab[] getLabs() {
+        Lab[] labArray = new Lab[this.labs.size()];
+        int i = 0;
+        for (Map.Entry<String, Lab> lab : this.labs.entrySet()) {
+            labArray[i++] = lab.getValue();
+        }
+
+        return labArray;
     }
 }

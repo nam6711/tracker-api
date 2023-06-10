@@ -7,14 +7,17 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.example.restservice.model.DropdownItems.Dropdown;
+import com.example.restservice.model.DropdownItems.DropdownSerializer;
 import com.example.restservice.model.DropdownItems.Item;
 import com.example.restservice.model.DropdownItems.Filter.Building;
 import com.example.restservice.model.DropdownItems.Filter.Feature;
+import com.example.restservice.model.Lab.Lab;
 import com.example.restservice.persistence.LabDAO.LabDAO;
 
 @Component
@@ -31,6 +34,9 @@ public class DropdownFileDAO implements DropdownDAO {
     public DropdownFileDAO(@Value("${dropdowns.file}") String filename, ObjectMapper objectMapper) throws IOException {
         this.filename = filename;
         this.objectMapper = objectMapper;
+        SimpleModule module = new SimpleModule();
+        module.addSerializer(Dropdown[].class, new DropdownSerializer());
+        this.objectMapper.registerModule(module);
         load(); // function to load all data from JSON file
     }
 
@@ -139,7 +145,7 @@ public class DropdownFileDAO implements DropdownDAO {
     /**
      * {@inheritDoc}
      */
-    public Item createFilter(String dropdownLocation, Item filter) throws IOException {
+    public Item createItem(String dropdownLocation, Item filter) throws IOException {
         synchronized (parentDropdowns) {
             // run through each lab, and then check if the given dropdown location
             //      is either within the dropdown, or the dropdown itself.
@@ -163,99 +169,52 @@ public class DropdownFileDAO implements DropdownDAO {
     /**
      * {@inheritDoc}
      */
-    public Boolean moveFilter(String dropdownLocation, String filterName) throws IOException {
+    public Boolean moveItem(String dropdownLocation, String filterName) throws IOException {
         // see if the item is a building or feature.
-        Item requestedFilter = this.findBuilding(filterName);
-        if (requestedFilter == null) {
-            requestedFilter = this.findSingleFeature(filterName);
+        synchronized(parentDropdowns) {
+            Item foundItem = null;
+            for (Dropdown dropdown : this.parentDropdowns.values()) {
+                foundItem = dropdown.findItem(filterName);
+                
+                // if the item exists, then leave
+                if (foundItem != null) {
+                    break;
+                }
+            } 
             
-            // if the feature is still null, then it doesn't exist
-            if (requestedFilter == null) {
-                return false;
+            for(Dropdown dropdown : this.parentDropdowns.values()) {
+                Dropdown result = dropdown.findDropdown(dropdownLocation);
+                // if the result of the previous query is not null, then we've found
+                //      our dropdown!! so add it on, and save the labs
+                if (result != null && foundItem != null) {
+                    // tell the filter to set itself to a new dropdown
+                    foundItem.setParent(result);
+    
+                    saveDropdowns(); // may throw an IOException
+                    return true;
+                }
             }
-        }
 
+            // if the new dropdown was never found, return false
+            return false;
+        }  
 
-        for(Dropdown dropdown : this.parentDropdowns.values()) {
-            Dropdown result = dropdown.findDropdown(dropdownLocation);
-            // if the result of the previous query is not null, then we've found
-            //      our dropdown!! so add it on, and save the labs
-            if (result != null) {
-                // tell the filter to set itself to a new dropdown
-                requestedFilter.setParent(result);
-
-                saveDropdowns(); // may throw an IOException
-                return true;
-            }
-        }
-
-        // if the new dropdown was never found, return false
-        return false;
     }
 
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Building updateBuildingInfo(Building building) throws IOException {
+    public Item updateItem(String itemName, Item updatedItem) throws IOException {
         synchronized (parentDropdowns) {
-            // give account its needed values
-            Building oldBuilding = this.findBuilding(building.getName());
-
-            // check if the lab already exists
-            if (oldBuilding != null) {
-                oldBuilding.updateBuildingInfo(building);
-            } else {
-                return null; // product does not exist
+            Item foundItem = null;
+            for (Dropdown dropdown : this.parentDropdowns.values()) {
+                foundItem = dropdown.findItem(itemName);
+                
+                // if the item exists, then leave
+                if (foundItem != null) {
+                    foundItem.updateSelf(updatedItem);
+                    if (saveDropdowns() && labDAO.saveLabs())
+                        return foundItem;
+                }
             }
-            
-            saveDropdowns(); // may throw an IOException
-            return oldBuilding;
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Building updateBuildingName(String[] names) throws IOException {
-        synchronized (parentDropdowns) {
-            // give account its needed values
-            Building oldBuilding = this.findBuilding(names[0]);
-
-            // check if the lab already exists
-            if (oldBuilding != null) {
-                oldBuilding.update(names[1]);
-            } else {
-                return null; 
-            }
-            
-            saveDropdowns(); // may throw an IOException
-            return oldBuilding;
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Feature updateFeatureName(String[] names) throws IOException {
-        synchronized (parentDropdowns) {
-            // give account its needed values
-            Feature oldFeature = this.findSingleFeature(names[0]);
-
-            // check if the lab already exists
-            if (oldFeature != null) {
-                // we update the first feature as we only are looking for one
-                //      feature
-                oldFeature.update(names[1]);
-            } else {
-                return null; // product does not exist
-            }
-            
-            saveDropdowns(); // may throw an IOException
-            return oldFeature;
+            return null;
         }
     }
 
@@ -266,8 +225,19 @@ public class DropdownFileDAO implements DropdownDAO {
                 
                 // if the item exists, then remove it
                 if (result != null) {
+                    // if a building, delete all attatched labs
+                    if (result instanceof Building) {
+                        Building building = (Building) result;
+                        Lab[] labs = building.getLabs();
+                        for (Lab lab : labs) {
+                            this.labDAO.deleteLab(lab.getId());
+                            lab.deleteSelf();
+                        }
+                    }
+
+                    // remove the filter
                     result.remove();
-                    return saveDropdowns();
+                    return (this.saveDropdowns());
                 }
             }
             

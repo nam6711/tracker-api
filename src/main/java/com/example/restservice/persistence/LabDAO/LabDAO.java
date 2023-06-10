@@ -2,8 +2,9 @@ package com.example.restservice.persistence.LabDAO;
 
 import java.io.IOException;
 
-import com.example.restservice.model.Lab;
+import com.example.restservice.model.Lab.Lab;
 import com.example.restservice.persistence.DropdownDAO.DropdownDAO;
+import com.fasterxml.jackson.databind.JsonNode;
 
 /**
  * Defines the interface for how to interact 
@@ -33,7 +34,7 @@ public interface LabDAO {
      * 
      * @throws IOException for any issues that may arise
      */
-    Lab getLab(String name) throws IOException;
+    JsonNode getLab(String name) throws IOException;
 
     /**
      * Get all existing labs within the labs Map
@@ -42,7 +43,7 @@ public interface LabDAO {
      * 
      * @throws IOException for any issues that may arise
      */
-    Lab[] getLabs() throws IOException;
+    JsonNode getLabs() throws IOException;
 
     /**
      * Creates and saves a {@linkplain Lab}
@@ -65,7 +66,7 @@ public interface LabDAO {
      * 
      * @throws IOException if underlying storage cannot be accessed
      */
-    Lab updateLab(Lab lab) throws IOException;
+    Lab updateLab(String labID, Lab lab) throws IOException;
 
     /**
      * Deletes a {@linkplain Lab} with the given name
@@ -79,4 +80,6 @@ public interface LabDAO {
      * @throws IOException if underlying storage cannot be accessed
      */
     boolean deleteLab(String name) throws IOException;
+
+    boolean saveLabs() throws IOException;
 }

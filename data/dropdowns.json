@@ -5,11 +5,11 @@
         "items": [
             {
                 "type": "Dropdown",
-                "name": "computer sciences",
+                "name": "engineering sciences",
                 "items": [
                     {
                         "type": "Building",
-                        "name": "golisano",
+                        "name": "gollisanno",
                         "abbreviation": "gol",
                         "num": "17",
                         "type": "Building"
@@ -18,22 +18,9 @@
                         "type": "Building",
                         "name": "magic",
                         "abbreviation": "mss",
-                        "num": "18",
+                        "num": "071",
                         "type": "Building"
                     },
-                    {
-                        "type": "Building",
-                        "name": "slaughter hall",
-                        "abbreviation": "sla",
-                        "num": "21",
-                        "type": "Building"
-                    }
-                ]
-            },
-            {
-                "type": "Dropdown",
-                "name": "engineering and physical sciences",
-                "items": [
                     {
                         "type": "Building",
                         "name": "gleason",
@@ -47,8 +34,16 @@
                         "abbreviation": "gos",
                         "num": "20",
                         "type": "Building"
+                    },
+                    {
+                        "type": "Building",
+                        "name": "slaughter hall",
+                        "abbreviation": "sla",
+                        "num": "21",
+                        "type": "Building"
                     }
-                ]
+                ],
+                "type": "Dropdown"
             },
             {
                 "type": "Dropdown",
@@ -101,7 +96,7 @@
         "items": [
             {
                 "type": "Dropdown",
-                "name": "tech",
+                "name": "computers and programs",
                 "items": [
                     {
                         "type": "Feature",
@@ -122,31 +117,44 @@
                         "type": "Feature",
                         "name": "wacom tablets",
                         "type": "Feature"
-                    }
-                ]
-            },
-            {
-                "type": "Dropdown",
-                "name": "software",
-                "items": [
+                    },
                     {
                         "type": "Feature",
                         "name": "adobe suite access",
                         "type": "Feature"
-                    },
+                    }
+                ],
+                "type": "Dropdown"
+            },
+            {
+                "type": "Dropdown",
+                "name": "engineering",
+                "items": [
                     {
                         "type": "Feature",
-                        "name": "render farm access",
-                        "type": "Feature"
-                    },
-                    {
-                        "type": "Feature",
-                        "name": "autodesk suite access",
+                        "name": "fire extinguishers",
                         "type": "Feature"
                     }
-                ]
+                ],
+                "type": "Dropdown"
+            },
+            {
+                "type": "Feature",
+                "name": "tfhhfcdxhdrrhg",
+                "type": "Feature"
+            },
+            {
+                "type": "Feature",
+                "name": "centrifuges",
+                "type": "Feature"
+            },
+            {
+                "type": "Feature",
+                "name": "idk any others",
+                "type": "Feature"
             }
-        ]
+        ],
+        "type": "Dropdown"
     },
     {
         "type": "Dropdown",

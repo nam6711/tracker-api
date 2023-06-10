@@ -37,6 +37,12 @@ public class Dropdown implements Item {
         for (Item item : this.items) {
             // tell item to subscribe to this as the parent
             item.setParent(this);
+            
+            // if this is a dropdown, then set its parent
+            if (item instanceof Dropdown) {
+                Dropdown dropdown = (Dropdown) item;
+                dropdown.loadDropdownItems();
+            }
         }
     }
 
@@ -203,12 +209,32 @@ public class Dropdown implements Item {
         this.items = itemBuffer;
     }
 
-    public void setParent(Dropdown item) {
-        // set the parent, and reset the children's parent
-        this.parent = item;
+    /**
+     * {@inheritDoc}
+     */
+    public void updateSelf(Item updatedItem) {
+        if (updatedItem instanceof Dropdown) {
+            Dropdown drop = (Dropdown) updatedItem;
+            this.name = drop.getName();
+        }
+    }
 
-        // tell the dropdown to update its children
-        this.loadDropdownItems();
+    public void setParent(Dropdown newParent) {
+        // first, check if the Item already has a parent. 
+        if (this.parent != null) {
+
+            // if the filter already has a parent, remove itself from the parent
+            this.parent.removeItem(this); 
+            // tell the new parent to add the dropdowns
+            newParent.addItem(this);
+        }
+
+        // set the new parent and add the item to it
+        this.parent = newParent;        
+        // we only call add item once a filter already has a parent as when
+        //      the server launches, the parent dropdowns already have a reference
+        //      to their child filters. if we call add item here, on launch duplicate
+        //      filters will be created
     }
 
     /**
@@ -220,5 +246,13 @@ public class Dropdown implements Item {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Item[] getItems() {
+        return this.items;
+    }
+
+    public String getType() {
+        return "Dropdown";
     }
 }

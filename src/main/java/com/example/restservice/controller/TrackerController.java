@@ -16,13 +16,11 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.example.restservice.model.Lab;
 import com.example.restservice.persistence.DropdownDAO.DropdownDAO;
-import com.example.restservice.persistence.LabDAO.LabDAO; 
-
-import com.example.restservice.model.DropdownItems.Item;
-import com.example.restservice.model.DropdownItems.Filter.Building;
-import com.example.restservice.model.DropdownItems.Filter.Feature;
+import com.example.restservice.persistence.LabDAO.LabDAO;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.example.restservice.model.DropdownItems.Item; 
+import com.example.restservice.model.Lab.Lab;
 
 @RestController
 @RequestMapping("tracker")
@@ -48,17 +46,17 @@ public class TrackerController {
      * OK if lab is found<br>
      * INTERNAL_SERVER_ERROR otherwise
      * Example: Return a lab with the name "New Media Lab" (SUCCEEDS)
-     * GET http://localhost:8080/tracker/getLab/New%20Media%20Lab
+     * GET http://localhost:8080/tracker/getLab/071-2175
      * Example: Return a lab with the name "Adobe" (FAILS)
      * GET http://localhost:8080/tracker/getLab/Adobe
      */
 	@GetMapping("getLab/{name}")
-	public ResponseEntity<Lab> getLab(@PathVariable String name) {
+	public ResponseEntity<JsonNode> getLab(@PathVariable String name) {
 		LOG.info("GET /lab " + name);
         try {
-            Lab lab = labDAO.getLab(name);
+            JsonNode lab = labDAO.getLab(name);
             if (lab != null)
-                return new ResponseEntity<Lab>(lab,HttpStatus.OK);
+                return new ResponseEntity<JsonNode>(lab,HttpStatus.OK);
             else
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
@@ -78,12 +76,12 @@ public class TrackerController {
      * GET http://localhost:8080/tracker/getLabs
      */
     @GetMapping("getLabs")
-    public ResponseEntity<Lab[]> getLabs() {
+    public ResponseEntity<JsonNode> getLabs() {
         LOG.info("GET /labs");
         try {
-            Lab[] labs = labDAO.getLabs();
+            JsonNode labs = labDAO.getLabs();
             if (labs != null)
-                return new ResponseEntity<Lab[]>(labs,HttpStatus.OK);
+                return new ResponseEntity<JsonNode>(labs,HttpStatus.OK);
             else
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
@@ -128,12 +126,12 @@ public class TrackerController {
      * ResponseEntity with HTTP status of NOT_FOUND if not found<br>
      * ResponseEntity with HTTP status of INTERNAL_SERVER_ERROR otherwise
      */
-    @PutMapping("updateLab")
-    public ResponseEntity<Lab> updateLab(@RequestBody Lab lab) {
-        LOG.info("PUT /lab " + lab);
+    @PutMapping("updateLab/{labID}")
+    public ResponseEntity<Lab> updateLab(@PathVariable String labID, @RequestBody Lab lab) {
+        LOG.info("PUT /lab " + labID);
 
         try {
-            Lab newLab = labDAO.updateLab(lab);
+            Lab newLab = labDAO.updateLab(labID, lab);
             if (newLab != null) 
                 return new ResponseEntity<Lab>(newLab,HttpStatus.OK);
             else 
@@ -196,11 +194,11 @@ public class TrackerController {
      * ResponseEntity with HTTP status of INTERNAL_SERVER_ERROR otherwise
      */
     @PostMapping("createFilter/{dropdownLocation}")
-    public ResponseEntity<Item> createProduct(@PathVariable String dropdownLocation, @RequestBody Item filter) {
-        LOG.info("POST /filter " + filter.getName() + " @ " + dropdownLocation);
+    public ResponseEntity<Item> createItem(@PathVariable String dropdownLocation, @RequestBody Item item) {
+        LOG.info("POST /filter " + item.getName() + " @ " + dropdownLocation);
 
         try {
-            Item newFilter = dropdownDAO.createFilter(dropdownLocation, filter);
+            Item newFilter = dropdownDAO.createItem(dropdownLocation, item);
             if (newFilter != null)
                 return new ResponseEntity<Item>(newFilter,HttpStatus.CREATED);
             else
@@ -211,12 +209,12 @@ public class TrackerController {
         }
     }
 
-    @PutMapping("moveFilter/{dropdownLocation}/{filterName}")
-    public ResponseEntity<Boolean> moveFilter(@PathVariable String dropdownLocation, @PathVariable String filterName) {
-        LOG.info("PUT /moveFilter " + filterName + " @ " + dropdownLocation);
+    @PutMapping("moveFilter/{dropdownLocation}/{itemName}")
+    public ResponseEntity<Boolean> moveItem(@PathVariable String dropdownLocation, @PathVariable String itemName) {
+        LOG.info("PUT /moveFilter " + itemName + " @ " + dropdownLocation);
 
         try {
-            Boolean result = dropdownDAO.moveFilter(dropdownLocation, filterName);
+            Boolean result = dropdownDAO.moveItem(dropdownLocation, itemName);
             if (result)
                 return new ResponseEntity<Boolean>(result,HttpStatus.CREATED);
             else
@@ -227,46 +225,46 @@ public class TrackerController {
         }
     }
 
-    @PutMapping("updateBuildingInfo")
-    public ResponseEntity<Building> updateBuildingInfo(@RequestBody Building building) {
-        LOG.info("PUT /building-info " + building);
+    // @PutMapping("updateBuildingInfo")
+    // public ResponseEntity<Building> updateBuildingInfo(@RequestBody Building building) {
+    //     LOG.info("PUT /building-info " + building);
+
+    //     try {
+    //         Building newBuilding = dropdownDAO.updateBuildingInfo(building);
+    //         if (newBuilding != null) 
+    //             return new ResponseEntity<Building>(newBuilding,HttpStatus.OK);
+    //         else 
+    //             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    //     }
+    //     catch(IOException e) {
+    //         return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+    //     }
+    // }
+
+    // @PutMapping("updateBuildingName")
+    // public ResponseEntity<Building> updateBuildingName(@RequestBody String[] names) {
+    //     LOG.info("PUT /building-name " + names);
+
+    //     try {
+    //         Building newBuilding = dropdownDAO.updateBuildingName(names);
+    //         if (newBuilding != null) 
+    //             return new ResponseEntity<Building>(newBuilding,HttpStatus.OK);
+    //         else 
+    //             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    //     }
+    //     catch(IOException e) {
+    //         return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+    //     }
+    // }
+
+    @PutMapping("updateItem/{itemName}")
+    public ResponseEntity<Item> updateItem(@PathVariable String itemName, @RequestBody Item newItem) {
+        LOG.info("PUT /update-item " + itemName);
 
         try {
-            Building newBuilding = dropdownDAO.updateBuildingInfo(building);
-            if (newBuilding != null) 
-                return new ResponseEntity<Building>(newBuilding,HttpStatus.OK);
-            else 
-                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-        catch(IOException e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    @PutMapping("updateBuildingName")
-    public ResponseEntity<Building> updateBuildingName(@RequestBody String[] names) {
-        LOG.info("PUT /building-name " + names);
-
-        try {
-            Building newBuilding = dropdownDAO.updateBuildingName(names);
-            if (newBuilding != null) 
-                return new ResponseEntity<Building>(newBuilding,HttpStatus.OK);
-            else 
-                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-        catch(IOException e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    @PutMapping("updateFeatureName")
-    public ResponseEntity<Feature> updateFeatureName(@RequestBody String[] names) {
-        LOG.info("PUT /building-name " + names);
-
-        try {
-            Feature newFeature = dropdownDAO.updateFeatureName(names);
-            if (newFeature != null) 
-                return new ResponseEntity<Feature>(newFeature,HttpStatus.OK);
+            Item updateItem = dropdownDAO.updateItem(itemName, newItem);
+            if (updateItem != null) 
+                return new ResponseEntity<Item>(updateItem,HttpStatus.OK);
             else 
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }

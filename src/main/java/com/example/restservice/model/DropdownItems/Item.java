@@ -65,4 +65,16 @@ public interface Item {
      * if a dropdown is removed, it shall remove itself permanently
      */
     void remove();
+
+    /**
+     * Every item can be updated by being given a new version.
+     * 
+     * The class will run through the important properties, and apply
+     *      them to itself.
+     * 
+     * @param updatedItem the new item to use when updating self
+     */
+    void updateSelf(Item updatedItem);
+
+    String getType();
 }

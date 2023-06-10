@@ -6,20 +6,26 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.TreeMap;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.example.restservice.model.Lab;
 import com.example.restservice.model.DropdownItems.Filter.Building;
 import com.example.restservice.model.DropdownItems.Filter.Feature;
+import com.example.restservice.model.Lab.Lab;
+import com.example.restservice.model.Lab.LabDeserializer;
+import com.example.restservice.model.Lab.LabPersistenceSerializer;
+import com.example.restservice.model.Lab.LabQuerySerializer;
 import com.example.restservice.persistence.DropdownDAO.DropdownDAO;
 
 @Component
 public class LabFileDAO implements LabDAO {
     Map<String, Lab> labs; // mapping for all labs after loaded from JSON
     private ObjectMapper objectMapper;
+    private ObjectMapper objectMapperForUserQueries;
 
     private String filename;
 
@@ -30,7 +36,20 @@ public class LabFileDAO implements LabDAO {
 
     public LabFileDAO(@Value("${labs.file}") String filename, ObjectMapper objectMapper) throws IOException {
         this.filename = filename;
+        
+        // sets up the mapper for lab persistence
         this.objectMapper = objectMapper;
+        SimpleModule module = new SimpleModule();
+        module.addDeserializer(Lab.class, new LabDeserializer());
+        module.addSerializer(Lab.class, new LabPersistenceSerializer());
+        this.objectMapper.registerModule(module);
+
+        // set the mapper for user queries
+        this.objectMapperForUserQueries = new ObjectMapper();
+        module = new SimpleModule();
+        module.addDeserializer(Lab.class, new LabDeserializer());
+        module.addSerializer(Lab.class, new LabQuerySerializer());
+        this.objectMapperForUserQueries.registerModule(module);
     }
 
     public void setDropdownDAO(DropdownDAO dropdownDAO) {
@@ -111,7 +130,7 @@ public class LabFileDAO implements LabDAO {
         return true;
     }
 
-    private boolean saveLabs() throws IOException {
+    public boolean saveLabs() throws IOException {
         // loads all labs into an array for saving to JSON
         Lab[] labArray = getLabArray();
 
@@ -123,12 +142,15 @@ public class LabFileDAO implements LabDAO {
      * {@inheritDoc}
      */
     @Override
-    public Lab getLab(String name) {
+    public JsonNode getLab(String name) throws IOException {
         synchronized (labs) {
-            if (labs.containsKey(name))
-                return labs.get(name);
-            else
+            if (labs.containsKey(name)) {
+                String nodes = objectMapperForUserQueries.writeValueAsString(labs.get(name));
+                return objectMapper.readTree(nodes);
+            }
+            else {
                 return null;
+            }
         }
     }
 
@@ -136,9 +158,11 @@ public class LabFileDAO implements LabDAO {
      * {@inheritDoc}
      */
     @Override
-    public Lab[] getLabs() throws IOException {
+    public JsonNode getLabs() throws IOException {
         synchronized (labs) {
-            return getLabArray();
+            Lab[] labArray = getLabArray();
+            String nodes = objectMapperForUserQueries.writeValueAsString(labArray);
+            return objectMapper.readTree(nodes); 
         }
     }
 
@@ -164,21 +188,18 @@ public class LabFileDAO implements LabDAO {
      ** {@inheritDoc}
      */
     @Override
-    public Lab updateLab(Lab lab) throws IOException {
+    public Lab updateLab(String labID, Lab lab) throws IOException {
         synchronized (labs) {
-            // give account its needed values
-            this.initializeLab(lab);
+            Lab labToUpdate = this.labs.get(labID);
+ 
+            // put the lab back on the list with new id
+            labToUpdate.updateSelf(lab); 
 
-            // check if the lab already exists
-            if (labs.containsKey(lab.getId()) == false)
-                return null; // product does not exist
-            else 
-                labs.get(lab.getId()).deleteSelf();
+            // set the labs features and buildings using the copy lab
+            this.initializeLab(labToUpdate, lab); // uses the updater that sets new features
 
-            // put new lab
-            labs.put(lab.getId(), lab);
             saveLabs(); // may throw an IOException
-            return lab;
+            return labToUpdate;
         }
     }
 
@@ -206,6 +227,14 @@ public class LabFileDAO implements LabDAO {
         lab.setLabBuilding(labBuilding);
         // features
         Feature[] labFeatures = this.dropdownDAO.findFeatures(lab.getFeatures());
+        lab.setLabFeatures(labFeatures); 
+    }
+
+    private void initializeLab(Lab lab, Lab labToCopy) {
+        // before lab can be read, it must be given access to the specified
+        // data  
+        
+        Feature[] labFeatures = this.dropdownDAO.findFeatures(labToCopy.getFeatures());
         lab.setLabFeatures(labFeatures);
     }
 }

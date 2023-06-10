@@ -73,7 +73,7 @@ public interface DropdownDAO {
      * 
      * @throws IOException if an issue with underlying storage
      */
-    Item createFilter(String dropdownLocation, Item filter) throws IOException;
+    Item createItem(String dropdownLocation, Item filter) throws IOException;
 
     /**
      * Moves a {@linkplain Filter} to another dropdown
@@ -85,7 +85,7 @@ public interface DropdownDAO {
      * 
      * @throws IOException if underlying storage cannot be accessed
      */
-    Boolean moveFilter(String dropdownLocation, String filterName) throws IOException;
+    Boolean moveItem(String dropdownLocation, String filterName) throws IOException;
 
     /**
      * Updates and saves a {@linkplain Building}
@@ -97,29 +97,7 @@ public interface DropdownDAO {
      * 
      * @throws IOException if underlying storage cannot be accessed
      */
-    Building updateBuildingInfo(Building filter) throws IOException;
-
-    /**
-     * Updates and saves a String[]
-     * 
-     * @param names holds the old name of a filter and the new name
-     * 
-     * @return updated Building
-     * 
-     * @throws IOException if underlying storage cannot be accessed
-     */
-    Building updateBuildingName(String[] names) throws IOException;
-
-    /**
-     * Updates and saves a String[]
-     * 
-     * @param names holds the old name of a filter and the new name
-     * 
-     * @return updated Feature
-     * 
-     * @throws IOException if underlying storage cannot be accessed
-     */
-    Feature updateFeatureName(String[] names) throws IOException;
+    Item updateItem(String itemName, Item updatedItem) throws IOException;  
 
     Boolean deleteItem(String itemname) throws IOException;
 } 

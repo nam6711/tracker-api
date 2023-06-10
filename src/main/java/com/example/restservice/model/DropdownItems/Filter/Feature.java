@@ -1,6 +1,7 @@
 package com.example.restservice.model.DropdownItems.Filter;
 
-import com.example.restservice.model.Lab;
+import com.example.restservice.model.DropdownItems.Item;
+import com.example.restservice.model.Lab.Lab;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
@@ -12,19 +13,29 @@ public class Feature extends Filter {
     }
 
     @Override
-    public void update(String name) {
-        // store old string
-        String oldName = this.getName();
-        // set name        
-        super.update(name);
-
-        System.out.println(oldName);
-
-        
+    public void update(String oldName) {  
         // iterate through all subscribed labs and alert them that the building
         //      name changed
         for (Lab lab : this.labs.values()) {
             lab.setFeatureName(oldName, this.getName());
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void updateSelf(Item updatedItem) {
+        if (updatedItem instanceof Feature) {
+            Feature drop = (Feature) updatedItem;
+            
+            String oldName = this.getName();
+            this.setName(drop.getName());
+            
+            this.update(oldName);
+        }
+    }
+
+    public String getType() {
+        return "Feature";
     }
 }
