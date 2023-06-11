@@ -157,6 +157,7 @@ public class DropdownFileDAO implements DropdownDAO {
                 //      our dropdown!! so add it on, and save the labs
                 if (result != null) {
                     result.addItem(filter);
+                    filter.setParent(result);
                     saveDropdowns(); // may throw an IOException
                     break;
                 }
