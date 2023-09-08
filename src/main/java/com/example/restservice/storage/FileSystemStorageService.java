@@ -33,7 +33,11 @@ public class FileSystemStorageService implements StorageService {
 	 
     private ChannelSftp setupJsch() throws JSchException {
         JSch jsch = new JSch();
-        jsch.setKnownHosts("src/main/resources/known_hosts");
+        String knownHostsFileName = "src/main/resources/known_hosts";
+        if (knownHostsFileName != null && new File(knownHostsFileName).exists()) {
+            jsch.setKnownHosts(knownHostsFileName);
+            System.out.println("KnownHostsFile added");
+        }
         Session jschSession = jsch.getSession(username, remoteHost);
         jschSession.setPassword(password);
         jschSession.connect(); 
@@ -46,6 +50,7 @@ public class FileSystemStorageService implements StorageService {
         channelSftp.connect();
       
         String remoteDir = "www/lab-tracker/"; 
+        System.out.println("SAVED " + file.getName());
 
 		channelSftp.put(file.getAbsolutePath(), remoteDir + file.getName());      
 

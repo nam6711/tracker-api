@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Timer;
 import java.util.TreeMap;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -117,6 +118,12 @@ public class DropdownFileDAO implements DropdownDAO {
 
     private Boolean saveDropdowns() throws IOException {
         // loads all labs into an array for saving to JSON
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
         Dropdown[] dropdownArray = getDropdownArray();
 
         objectMapper.writeValue(new File(filename), dropdownArray);

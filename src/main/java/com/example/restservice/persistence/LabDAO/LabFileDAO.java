@@ -136,6 +136,12 @@ public class LabFileDAO implements LabDAO {
 
     public boolean saveLabs() throws IOException {
         // loads all labs into an array for saving to JSON
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        
         Lab[] labArray = getLabArray();
 
         objectMapper.writeValue(new File(filename), labArray);
