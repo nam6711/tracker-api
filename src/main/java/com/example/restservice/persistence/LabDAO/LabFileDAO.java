@@ -2,6 +2,7 @@ package com.example.restservice.persistence.LabDAO;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.TreeMap;
@@ -9,6 +10,8 @@ import java.util.TreeMap;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.SftpException;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -20,6 +23,7 @@ import com.example.restservice.model.Lab.LabDeserializer;
 import com.example.restservice.model.Lab.LabPersistenceSerializer;
 import com.example.restservice.model.Lab.LabQuerySerializer;
 import com.example.restservice.persistence.DropdownDAO.DropdownDAO;
+import com.example.restservice.storage.FileSystemStorageService;
 
 @Component
 public class LabFileDAO implements LabDAO {
@@ -116,7 +120,7 @@ public class LabFileDAO implements LabDAO {
         labs = new TreeMap<>();
 
         // loads all labs from JSON and maps into an array of Labs
-        Lab[] labArray = objectMapper.readValue(new File(filename), Lab[].class);
+        Lab[] labArray = objectMapper.readValue(new URL("https://people.rit.edu/nam6711/lab-tracker/labs.json"), Lab[].class);
 
         // iterate through the array, placing the current lab into the labs Map
         for (Lab lab : labArray) {
@@ -135,6 +139,17 @@ public class LabFileDAO implements LabDAO {
         Lab[] labArray = getLabArray();
 
         objectMapper.writeValue(new File(filename), labArray);
+
+        try {
+            FileSystemStorageService fsss = new FileSystemStorageService();
+            fsss.store(new File(filename));
+        } catch (IOException exception) {
+            exception.printStackTrace();
+        } catch (JSchException jSchException) {
+            jSchException.printStackTrace();
+        } catch (SftpException sftpException) {
+            sftpException.printStackTrace();
+        }
         return true;
     }
 

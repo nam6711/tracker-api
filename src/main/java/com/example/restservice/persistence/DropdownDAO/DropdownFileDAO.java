@@ -2,12 +2,15 @@ package com.example.restservice.persistence.DropdownDAO;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.TreeMap;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.SftpException;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -19,6 +22,7 @@ import com.example.restservice.model.DropdownItems.Filter.Building;
 import com.example.restservice.model.DropdownItems.Filter.Feature;
 import com.example.restservice.model.Lab.Lab;
 import com.example.restservice.persistence.LabDAO.LabDAO;
+import com.example.restservice.storage.FileSystemStorageService;
 
 @Component
 public class DropdownFileDAO implements DropdownDAO {
@@ -96,9 +100,9 @@ public class DropdownFileDAO implements DropdownDAO {
     private boolean load() throws IOException {
         parentDropdowns = new TreeMap<>();
 
-        // loads all labs from JSON and maps into an array of Labs 
-        Dropdown[] dropdownArray = objectMapper.readValue(new File(filename), Dropdown[].class);
-        
+        // loads all labs from JSON and maps into an array of Labs
+        Dropdown[] dropdownArray = objectMapper.readValue(new URL("https://people.rit.edu/nam6711/lab-tracker/dropdowns.json"), Dropdown[].class);
+
         // tell labs to initialize their objects, and take the returned items
         //      to be loaded persistently
         for (Dropdown dropdown : dropdownArray) {
@@ -116,6 +120,17 @@ public class DropdownFileDAO implements DropdownDAO {
         Dropdown[] dropdownArray = getDropdownArray();
 
         objectMapper.writeValue(new File(filename), dropdownArray);
+
+        try {
+            FileSystemStorageService fsss = new FileSystemStorageService();
+            fsss.store(new File(filename));
+        } catch (IOException exception) {
+            exception.printStackTrace();
+        } catch (JSchException jSchException) {
+            jSchException.printStackTrace();
+        } catch (SftpException sftpException) {
+            sftpException.printStackTrace();
+        }
         return true;
     }
 

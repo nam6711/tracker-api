@@ -6,6 +6,7 @@ import java.util.TreeMap;
 import com.example.restservice.model.DropdownItems.Dropdown;
 import com.example.restservice.model.DropdownItems.Item;
 import com.example.restservice.model.Lab.Lab;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
@@ -21,6 +22,7 @@ public abstract class Filter implements Item {
     private Dropdown parent;
 
     // observers
+    @JsonIgnore
     Map<String, Lab> labs;
 
     public Filter(@JsonProperty("type") String type, @JsonProperty("name") String name) {

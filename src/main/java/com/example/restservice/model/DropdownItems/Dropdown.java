@@ -3,6 +3,7 @@ package com.example.restservice.model.DropdownItems;
 
 import com.example.restservice.model.DropdownItems.Filter.Building;
 import com.example.restservice.model.DropdownItems.Filter.Feature;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import ch.qos.logback.core.filter.Filter;
