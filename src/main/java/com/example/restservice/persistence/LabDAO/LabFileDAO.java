@@ -120,7 +120,7 @@ public class LabFileDAO implements LabDAO {
         labs = new TreeMap<>();
 
         // loads all labs from JSON and maps into an array of Labs
-        Lab[] labArray = objectMapper.readValue(new URL("https://people.rit.edu/nam6711/lab-tracker/labs.json"), Lab[].class);
+        Lab[] labArray = objectMapper.readValue(new URL("https://rit-lab-tracker.com/labs.json"), Lab[].class);
 
         // iterate through the array, placing the current lab into the labs Map
         for (Lab lab : labArray) {

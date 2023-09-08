@@ -21,9 +21,9 @@ public class FileSystemStorageService implements StorageService {
 
 	private Path rootLocation;
 
-	private String remoteHost = "banjo.rit.edu";
-	private String username = "nam6711";
-	private String password = "Hithere@28"; 
+	private String remoteHost = "162.144.3.38";
+	private String username = "ritlabtr";
+	private String password = "Hithere@2828"; 
 
 	@Autowired
 	public FileSystemStorageService() {
@@ -40,6 +40,10 @@ public class FileSystemStorageService implements StorageService {
         }
         Session jschSession = jsch.getSession(username, remoteHost);
         jschSession.setPassword(password);
+        // dangerous but idk what else to do
+        java.util.Properties config = new java.util.Properties();
+        config.put("StrictHostKeyChecking", "no");
+        jschSession.setConfig(config);
         jschSession.connect(); 
         return (ChannelSftp) jschSession.openChannel("sftp");
     }
@@ -49,7 +53,7 @@ public class FileSystemStorageService implements StorageService {
         ChannelSftp channelSftp = setupJsch();
         channelSftp.connect();
       
-        String remoteDir = "www/lab-tracker/"; 
+        String remoteDir = "www/"; 
         System.out.println("SAVED " + file.getName());
 
 		channelSftp.put(file.getAbsolutePath(), remoteDir + file.getName());      
