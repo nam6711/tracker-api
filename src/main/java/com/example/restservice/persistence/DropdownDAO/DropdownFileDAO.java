@@ -102,7 +102,8 @@ public class DropdownFileDAO implements DropdownDAO {
         parentDropdowns = new TreeMap<>();
 
         // loads all labs from JSON and maps into an array of Labs
-        Dropdown[] dropdownArray = objectMapper.readValue(new URL("https://rit-lab-tracker.com/dropdowns.json"), Dropdown[].class);
+        // Dropdown[] dropdownArray = objectMapper.readValue(new URL("https://rit-lab-tracker.com/dropdowns.json"), Dropdown[].class);
+        Dropdown[] dropdownArray = objectMapper.readValue(new URL("https://people.rit.edu/nam6711/lab-tracker/dropdowns.json"), Dropdown[].class);
 
         // tell labs to initialize their objects, and take the returned items
         //      to be loaded persistently
