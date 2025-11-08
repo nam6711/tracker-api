@@ -7,12 +7,6 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.TreeMap;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.jcraft.jsch.JSchException;
-import com.jcraft.jsch.SftpException;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -24,6 +18,11 @@ import com.example.restservice.model.Lab.LabPersistenceSerializer;
 import com.example.restservice.model.Lab.LabQuerySerializer;
 import com.example.restservice.persistence.DropdownDAO.DropdownDAO;
 import com.example.restservice.storage.FileSystemStorageService;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.SftpException;
 
 @Component
 public class LabFileDAO implements LabDAO {
@@ -120,7 +119,7 @@ public class LabFileDAO implements LabDAO {
         labs = new TreeMap<>();
 
         // loads all labs from JSON and maps into an array of Labs
-        Lab[] labArray = objectMapper.readValue(new URL("https://rit-lab-tracker.com/labs.json"), Lab[].class);
+        Lab[] labArray = objectMapper.readValue(new URL(this.filename), Lab[].class);
 
         // iterate through the array, placing the current lab into the labs Map
         for (Lab lab : labArray) {

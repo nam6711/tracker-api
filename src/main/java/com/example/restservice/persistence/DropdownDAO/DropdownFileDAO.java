@@ -5,13 +5,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Map;
-import java.util.Timer;
 import java.util.TreeMap;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.jcraft.jsch.JSchException;
-import com.jcraft.jsch.SftpException;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -24,6 +18,10 @@ import com.example.restservice.model.DropdownItems.Filter.Feature;
 import com.example.restservice.model.Lab.Lab;
 import com.example.restservice.persistence.LabDAO.LabDAO;
 import com.example.restservice.storage.FileSystemStorageService;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.SftpException;
 
 @Component
 public class DropdownFileDAO implements DropdownDAO {
@@ -102,7 +100,7 @@ public class DropdownFileDAO implements DropdownDAO {
         parentDropdowns = new TreeMap<>();
 
         // loads all labs from JSON and maps into an array of Labs
-        Dropdown[] dropdownArray = objectMapper.readValue(new URL("https://rit-lab-tracker.com/dropdowns.json"), Dropdown[].class);
+        Dropdown[] dropdownArray = objectMapper.readValue(new URL(this.filename), Dropdown[].class);
 
         // tell labs to initialize their objects, and take the returned items
         //      to be loaded persistently

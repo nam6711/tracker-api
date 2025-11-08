@@ -8,6 +8,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 
+import org.springframework.beans.factory.annotation.Value;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
@@ -17,6 +19,7 @@ public class LabScheduleUpdater implements Runnable {
     private final LabMeetingContainer container;
     private String name;
     private String labID;
+    private @Value("${host.key}") String key = "";
     Thread t;
 
     public LabScheduleUpdater(String threadName, String labID, LabMeetingContainer container) {
@@ -50,8 +53,8 @@ public class LabScheduleUpdater implements Runnable {
         JsonNode jsonData;
         
         // url vars
+        // TODO: update api handling
         final String url = "https://api.rit.edu/rooms/" + labID + "/meetings?date=";
-        final String key = "&RITAuthorization=hPMWQJXKEbVLURMOcJnekKRtlKtbjeStmWRPdojy";
         String queryString = "";
 
         // holds date objects
@@ -76,7 +79,7 @@ public class LabScheduleUpdater implements Runnable {
                     // fetch the data
                     jsonData = mapper.readTree(new URL(queryString));
                     // query and put the item into the map
-                    LabQuery[] query = mapper.readValue(jsonData.toString(), LabQuery[].class);    
+                    LabQuery[] query = mapper.readValue(jsonData.toString(), LabQuery[].class);
                     if (query.length > 0)
                         queries.put(query[0].getDay(), query);
                 } catch (IOException e) {

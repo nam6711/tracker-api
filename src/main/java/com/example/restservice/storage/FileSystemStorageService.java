@@ -2,13 +2,12 @@ package com.example.restservice.storage;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream; 
 import java.nio.file.Path;
-import java.nio.file.Paths; 
+import java.nio.file.Paths;
 
-import org.springframework.beans.factory.annotation.Autowired; 
-import org.springframework.stereotype.Service; 
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSch;
@@ -21,9 +20,10 @@ public class FileSystemStorageService implements StorageService {
 
 	private Path rootLocation;
 
-	private String remoteHost = "162.144.3.38";
-	private String username = "ritlabtr";
-	private String password = "Hithere@2828"; 
+    // SET THESE BASED ON CONFIG FILE
+	private @Value("${host.domain}") String remoteHost = "host";
+	private @Value("${host.username}") String username = "username";
+	private @Value("${host.password}") String password = "pword";
 
 	@Autowired
 	public FileSystemStorageService() {
